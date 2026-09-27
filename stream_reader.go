@@ -49,6 +49,9 @@ func newStream[T streamable](ctx context.Context, core *core, resp *http.Respons
 }
 
 func (s *streamReader[T]) Recv() (response *T, err error) {
+	if s.isFinished {
+		return nil, io.EOF
+	}
 	return s.processLines()
 }
 
