@@ -11,6 +11,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// TestStreamStopsAfterTerminalEvent checks that Chat.Stream and
+// Workflows.Runs.Stream stop reading the HTTP response once the terminal event
+// has been delivered, both when the server appends a trailing event and when it
+// keeps the connection open.
 func TestStreamStopsAfterTerminalEvent(t *testing.T) {
 	for _, protocol := range []string{"chat", "workflow"} {
 		for _, keepOpen := range []bool{false, true} {
@@ -64,6 +68,9 @@ func TestStreamStopsAfterTerminalEvent(t *testing.T) {
 	}
 }
 
+// assertFinishedStream asserts that repeated Recv calls on a finished stream
+// return io.EOF promptly instead of waiting for more HTTP data. It cancels the
+// request context before failing so the test server can shut down.
 func assertFinishedStream[T streamable](t *testing.T, stream Stream[T], cancel context.CancelFunc) {
 	t.Helper()
 	type result struct {
